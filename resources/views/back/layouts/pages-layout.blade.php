@@ -15,10 +15,15 @@
     <title> @yield('pageTitle') </title>
     <!-- CSS files -->
     <base href="/">
+    <link rel="shortcut icon" href="{{ \App\Models\Setting::find(1)->blog_favicon }}" type="image/x-icon">
     <link href="./back/dist/css/tabler.min.css?1674944402" rel="stylesheet"/>
     <link href="./back/dist/css/tabler-flags.min.css?1674944402" rel="stylesheet"/>
     <link href="./back/dist/css/tabler-payments.min.css?1674944402" rel="stylesheet"/>
     <link href="./back/dist/css/tabler-vendors.min.css?1674944402" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <link rel="stylesheet" href="{{ asset('back/dist/libs/ijabo.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('back/dist/libs/ijaboCropTool/ijaboCropTool.min.css') }}">
+
     @stack('stylesheets')
     @livewireStyles
     <link href="./back/dist/css/demo.min.css?1674944402" rel="stylesheet"/>
@@ -50,14 +55,38 @@
       </div>
     </div>
     <!-- Libs JS -->
+    <script src="{{ asset('back/dist/libs/jquery/jquery-3.6.0.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="{{ asset('back/dist/libs/ijabo/ijabo.min.js') }}"></script>
+    <script src="{{ asset('back/dist/libs/ijaboCropTool/ijaboCropTool.min.js') }}"></script>
+    <script src="{{ asset('back/dist/libs/ijaboViewer/jquery.ijaboViewer.min.js') }}"></script>
     <script src="./back/dist/libs/apexcharts/dist/apexcharts.min.js?1674944402" defer></script>
     <script src="./back/dist/libs/jsvectormap/dist/js/jsvectormap.min.js?1674944402" defer></script>
     <script src="./back/dist/libs/jsvectormap/dist/maps/world.js?1674944402" defer></script>
     <script src="./back/dist/libs/jsvectormap/dist/maps/world-merc.js?1674944402" defer></script>
     <!-- Tabler Core -->
     <script src="./back/dist/js/tabler.min.js?1674944402" defer></script>
+   
     @stack('scripts')
     @livewireScripts
+     {{-- Toastr Script --}}
+     <script>
+      $(document).ready(function() {
+          toastr.options = {
+              "progressBar": true,
+              "positionClass": "toast-top-right"
+          }  
+      });
+
+      window.addEventListener('success', event => {
+          toastr.success(event.detail.message);
+      });
+
+      window.addEventListener('error', event => {
+          toastr.error(event.detail.message);
+      });
+      
+    </script>
     <script src="./back/dist/js/demo.min.js?1674944402" defer></script>
   </body>
 </html>

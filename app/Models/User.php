@@ -25,7 +25,8 @@ class User extends Authenticatable
         'biography',
         'type',
         'blocked',
-        'direct_publish'
+        'direct_publish',
+        'picture'
     ];
 
     /**
@@ -46,4 +47,18 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function authorType()
+    {
+        return $this->belongsTo(Type::class,'type','id');
+    }
+
+    public function getPictureAttribute($value) 
+    {
+        if($value) {
+            return asset('back/dist/img/authors/'.$value);
+        } else {
+            return asset('back/dist/img/authors/user_male.jpg');
+        }
+    }
 }

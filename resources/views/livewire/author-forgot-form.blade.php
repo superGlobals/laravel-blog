@@ -1,7 +1,11 @@
 <div>
     {{-- Stop trying to control. --}}
+    @if (Session::get('fail'))
+      <div class="alert alert-danger">{!! Session::get('fail') !!}</div>
+    @endif
+
     @if (Session::get('success'))
-        <div class="alert alert-success">{{ Session::get('success') }}</div>
+      <div class="alert alert-success">{!! Session::get('success') !!}</div>
     @endif
 
     <form class="card card-md" method="POST" autocomplete="off" novalidate wire:submit.prevent="ForgotHandler()">
