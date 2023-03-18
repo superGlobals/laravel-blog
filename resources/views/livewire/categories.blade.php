@@ -72,7 +72,7 @@
                               <tr>
                                 <td>{{ $subcategory->subcategory_name }}</td>
                                 <td>{{ $subcategory->parentCategory->category_name }}</td>
-                                <td>4</td>
+                                <td>{{ $subcategory->posts->count() }}</td>
                                 <td>
                                     <div class="btn-group">
                                         <a href="" class="btn btn-primary btn-sm" wire:click.prevent="editSubCategory({{ $subcategory->id }})">Edit</a>
