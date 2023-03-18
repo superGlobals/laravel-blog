@@ -5,16 +5,34 @@ namespace App\Http\Livewire;
 use App\Models\User;
 use Livewire\Component;
 use Nette\Utils\Random;
+use Livewire\WithPagination;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
 class Authors extends Component
 {
+    use WithPagination;
+
     public $name, $email, $username, $author_type, $direct_publisher;
+    public $search, $perPage = 4;
+    public $selected_author_id;
+    public $blocked = 0;
 
     protected $listeners = [
-        'resetForms'
+        'resetForms',
+        'deleteAuthorAction'
     ];
+
+    public function mount()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
 
     public function resetForms()
     {
@@ -41,7 +59,7 @@ class Authors extends Component
             $author->username = $this->username;
             $author->password = Hash::make($default_password);
             $author->type = $this->author_type;
-            $author->direct_publisher = $this->direct_publisher;
+            $author->direct_publish = $this->direct_publisher;
             $saved = $author->save();
 
             $data = [
@@ -74,6 +92,68 @@ class Authors extends Component
         }
     }
 
+    public function editAuthor($author) 
+    {
+        $this->selected_author_id = $author['id'];
+        $this->name = $author['name'];
+        $this->email = $author['email'];
+        $this->username = $author['username'];
+        $this->author_type = $author['type'];
+        $this->direct_publisher = $author['direct_publish'];
+        $this->blocked = $author['blocked'];
+
+        $this->dispatchBrowserEvent('showEditAuthorModal');
+    }
+
+    public function updateAuthor()
+    {
+        $this->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email,'.$this->selected_author_id,
+            'username' => 'required|min:6|max:20|unique:users,username,'.$this->selected_author_id,
+        ]);
+
+        if($this->selected_author_id) {
+            $author = User::find($this->selected_author_id);
+            $author->update([
+                'name' => $this->name,
+                'email' => $this->email,
+                'username' => $this->username,
+                'type' => $this->author_type,
+                'blocked' => $this->blocked,
+                'direct_publish' => $this->direct_publisher,
+            ]);
+
+            $this->dispatchBrowserEvent('success', ['message' => 'Author details updated succesfully.']);
+            $this->dispatchBrowserEvent('hide_edit_author_modal');
+
+        }
+    }
+
+    public function deleteAuthor($author)
+    {
+        $this->dispatchBrowserEvent('deleteAuthor', [
+            'title' => 'Are you sure',
+            'html' => 'You want to delete this author: <br><b>'.$author['name'].'</b>',
+            'id' => $author['id']
+        ]);
+    }
+
+    public function deleteAuthorAction($id) 
+    {
+        $author = User::find($id);
+        $path = 'back/dist/img/authors';
+        $author_picture = $author->getAttributes()['picture'];
+        $picture_full_path = $path.$author_picture;
+
+        if($author_picture != null || File::exists(public_path($picture_full_path))) {
+            File::delete(public_path($picture_full_path));
+        }
+
+        $author->delete();
+        $this->dispatchBrowserEvent('success', ['message' => 'Author deleted successfully.']);
+    }
+
     public function isOnline($site = "https://youtube.com")
     {
         if(@fopen($site,"r")) {
@@ -86,7 +166,8 @@ class Authors extends Component
     public function render()
     {
         return view('livewire.authors', [
-            'authors' => User::where('id', '!=', auth()->id())->get()
+            'authors' => User::search(trim($this->search))
+                            ->where('id', '!=', auth()->id())->paginate($this->perPage)
         ]);
     }
 

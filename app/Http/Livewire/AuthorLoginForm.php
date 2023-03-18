@@ -48,6 +48,7 @@ class AuthorLoginForm extends Component
                 if($this->returnUrl != null) {
                     return redirect()->to($this->returnUrl);
                 }
+                return redirect()->route('author.home');
             }
                 
         } else {

@@ -56,10 +56,12 @@
     </div>
     <!-- Libs JS -->
     <script src="{{ asset('back/dist/libs/jquery/jquery-3.6.0.min.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="{{ asset('back/dist/libs/ijabo/ijabo.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="{{ asset('back/dist/libs/ijaboCropTool/ijaboCropTool.min.js') }}"></script>
     <script src="{{ asset('back/dist/libs/ijaboViewer/jquery.ijaboViewer.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src="./back/dist/libs/apexcharts/dist/apexcharts.min.js?1674944402" defer></script>
     <script src="./back/dist/libs/jsvectormap/dist/js/jsvectormap.min.js?1674944402" defer></script>
     <script src="./back/dist/libs/jsvectormap/dist/maps/world.js?1674944402" defer></script>
