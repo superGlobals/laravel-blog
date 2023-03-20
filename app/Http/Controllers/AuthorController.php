@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 
 class AuthorController extends Controller
 {
@@ -116,7 +117,7 @@ class AuthorController extends Controller
         $request->validate([
             'post_title' => 'required|unique:posts,post_title',
             'post_content' => 'required',
-            'post_category' => 'required|exists:categories,id',
+            // 'post_category' => 'required|exists:categories,id',
             'featured_image' => 'required|mimes:jpeg,jpg,png|max:1024'
         ]);
 
@@ -127,6 +128,20 @@ class AuthorController extends Controller
             $new_filename = time().'.'.$filename;
 
             $upload = Storage::disk('public')->put($path.$new_filename, (string) file_get_contents($file));
+            $post_thumbnails_path = $path.'thumbnails';
+            if(!Storage::disk('public')->exists($post_thumbnails_path)) {
+                Storage::disk('public')->makeDirectory($post_thumbnails_path, 0755, true, true);
+            }
+
+            // Create square thumbnail
+            Image::make(storage_path('app/public/'.$path.$new_filename))
+                    ->fit(200, 200)
+                    ->save( storage_path('app/public/'.$path.'thumbnails/'.'thumb_'.$new_filename));
+
+            // Create resized image
+            Image::make(storage_path('app/public/'.$path.$new_filename))
+                    ->fit(500, 350)
+                    ->save( storage_path('app/public/'.$path.'thumbnails/'.'resized_'.$new_filename));
             
             if($upload) {
                 $post = new Post();
@@ -149,4 +164,107 @@ class AuthorController extends Controller
             }
         }
     }
+
+    public function editPost(Request $request)
+    {
+        if(!$request->post_id) {
+            return abort(404);
+        } else {
+            $post = Post::find($request->post_id);
+            $data = [
+                'post' => $post,
+                'pageTitle' => 'Edit Post'
+            ];
+
+            return view('back.pages.edit-post', $data);
+        }
+    }
+
+    public function updatePost(Request $request)
+    {
+        if($request->hasFile('featured_image')) {
+            $request->validate([
+                'post_title' => 'required|unique:posts,post_title,'.$request->post_id,
+                'post_content' => 'required',
+                'post_category' => 'required|exists:sub_categories,id',
+                'featured_image' => 'mimes:jpeg,png,jpg|max:1024'
+            ]);
+
+            $path = 'images/post_images/';
+            $file = $request->file('featured_image');
+            $filename = $file->getClientOriginalExtension();
+            $new_filename = time().'.'.$filename;
+
+            $upload = Storage::disk('public')->put($path.$new_filename, (string) file_get_contents($file));
+            $post_thumbnails_path = $path.'thumbnails';
+            if(!Storage::disk('public')->exists($post_thumbnails_path)) {
+                Storage::disk('public')->makeDirectory($post_thumbnails_path, 0755, true, true);
+            }
+
+            // Create square thumbnail
+            Image::make(storage_path('app/public/'.$path.$new_filename))
+                    ->fit(200, 200)
+                    ->save( storage_path('app/public/'.$path.'thumbnails/'.'thumb_'.$new_filename));
+
+            // Create resized image
+            Image::make(storage_path('app/public/'.$path.$new_filename))
+                    ->fit(500, 350)
+                    ->save( storage_path('app/public/'.$path.'thumbnails/'.'resized_'.$new_filename));
+            
+            if($upload) {
+                $old_post_image = Post::find($request->post_id)->featured_image;
+
+                if($old_post_image != null && Storage::disk('public')->exists($path.$old_post_image)) {
+                    Storage::disk('public')->delete($path.$old_post_image);
+
+                    if(Storage::disk('public')->exists($path.'thumbnails/resized_'.$old_post_image)) {
+                        Storage::disk('public')->delete($path.'thumbnails/resized_'.$old_post_image);
+                    }
+
+                    if(Storage::disk('public')->exists($path.'thumbnails/thumb_'.$old_post_image)) {
+                        Storage::disk('public')->delete($path.'thumbnails/thumb_'.$old_post_image);
+                    }
+                }
+
+                $post = Post::find($request->post_id);
+                $post->category_id = $request->post_category;
+                $post->post_slug = null;
+                $post->post_content = $request->post_content;
+                $post->post_title = $request->post_title;
+                $post->featured_image = $new_filename;
+                $save = $post->save();
+
+                if($save) {
+                    return response()->json(['code' => 1, 'msg' => 'Post updated successfully']);
+                } else {
+                    return response()->json(['code' => 3, 'msg' => 'Something went wrong']);
+                }
+
+            } else {
+                return response()->json(['code' => 3, 'msg' => 'Something went wrong']);
+            }
+
+
+        } else {
+            $request->validate([
+                'post_title' => 'required|unique:posts,post_title,'.$request->post_id,
+                'post_content' => 'required',
+                'post_category' => 'required|exists:sub_categories,id'
+            ]);
+
+            $post = Post::find($request->post_id);
+            $post->category_id = $request->post_category;
+            $post->post_slug = null;
+            $post->post_content = $request->post_content;
+            $post->post_title = $request->post_title;
+            $save = $post->save();
+
+            if($save) {
+                return response()->json(['code' => 1, 'msg' => 'Post updated successfully']);
+            } else {
+                return response()->json(['code' => 3, 'msg' => 'Something went wrong']);
+            }
+        }
+    }
+
 }

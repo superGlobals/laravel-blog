@@ -27,7 +27,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Post content</label>
-                        <textarea class="form-control" name="post_content" rows="6" placeholder="Content.."></textarea>
+                        <textarea class="ckeditor form-control" name="post_content" id="post_content" rows="6" placeholder="Content.."></textarea>
                         <span class="text-danger error-text post_content_error"></span>
                       </div>
                 </div>
@@ -60,54 +60,59 @@
 @endsection
 
 @push('scripts')
-    <script>
-        $(function() {
-            $('input[type="file"][name="featured_image"]').ijaboViewer({
-                preview: '#image-preview',
-                imageShape: 'rectangular',
-                allowedExtensions: ['jpg','jpeg','png'],
-                onErrorShape: function(message,element) {
-                    alert(message);
+<script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
+
+<script>
+    $(function() {
+        $('input[type="file"][name="featured_image"]').ijaboViewer({
+            preview: '#image-preview',
+            imageShape: 'rectangular',
+            allowedExtensions: ['jpg','jpeg','png'],
+            onErrorShape: function(message,element) {
+                alert(message);
+            },
+            onInvalidType: function(message,element) {
+                alert(message);
+            }
+        });
+
+        $('form#addPostForm').on('submit', function(e) {
+            e.preventDefault(); 
+            toastr.remove();
+            var post_content = CKEDITOR.instances.post_content.getData();
+            var form = this;
+            var fromdata = new FormData(form);
+                fromdata.append('post_content', post_content);
+            
+            $.ajax({
+                url: $(form).attr('action'),
+                method: $(form).attr('method'),
+                data: fromdata,
+                processData: false,
+                dataType: 'json',
+                contentType: false,
+                beforeSend: function(){
+                    $(form).find('span.error-text').text('');
                 },
-                onInvalidType: function(message,element) {
-                    alert(message);
+                success: function(response) {
+                    toastr.remove();
+                    if(response.code == 1) {
+                        $(form)[0].reset();
+                        $('div.image_holder').find('img').attr('src','');
+                        CKEDITOR.instances.post_content.setData('');
+                        toastr.success(response.msg);
+                    } else {
+                        toastr.error(response.msg);
+                    }
+                },
+                error: function(response) {
+                    toastr.remove();
+                    $.each(response.responseJSON.errors, function(prefix,val) {
+                        $(form).find('span.'+prefix+'_error').text(val[0]);
+                    });
                 }
             });
-
-            $('form#addPostForm').on('submit', function(e) {
-                e.preventDefault();
-                toastr.remove();
-                var form = this;
-                var fromdata = new FormData(form);
-                
-                $.ajax({
-                    url: $(form).attr('action'),
-                    method: $(form).attr('method'),
-                    data: fromdata,
-                    processData: false,
-                    dataType: 'json',
-                    contentType: false,
-                    beforeSend: function(){
-                        $(form).find('span.error-text').text('');
-                    },
-                    success: function(response) {
-                        toastr.remove();
-                        if(response.code == 1) {
-                            $(form)[0].reset();
-                            $('div.image-holder').html('');
-                            toastr.success(response.msg);
-                        } else {
-                            toastr.error(response.msg);
-                        }
-                    },
-                    error: function(response) {
-                        toastr.remove();
-                        $.each(response.responseJSON.errors, function(prefix,val) {
-                            $(form).find('span.'+prefix+'_error').text(val[0]);
-                        });
-                    }
-                });
-            });
         });
-    </script>
+    });
+</script>
 @endpush

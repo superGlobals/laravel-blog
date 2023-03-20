@@ -70,4 +70,9 @@ class User extends Authenticatable
                   ->orWhere('email', 'like', $term);
         });
     }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class,'author_id', 'id');
+    }
 }

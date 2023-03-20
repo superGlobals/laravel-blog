@@ -23,6 +23,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
     <link rel="stylesheet" href="{{ asset('back/dist/libs/ijabo.min.css') }}">
     <link rel="stylesheet" href="{{ asset('back/dist/libs/ijaboCropTool/ijaboCropTool.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('jquery-ui-1.13.2/jquery-ui.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('jquery-ui-1.13.2/jquery-ui.structure.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('jquery-ui-1.13.2/jquery-ui.theme.min.css') }}">
 
     @stack('stylesheets')
     @livewireStyles
@@ -66,6 +69,7 @@
     <script src="./back/dist/libs/jsvectormap/dist/js/jsvectormap.min.js?1674944402" defer></script>
     <script src="./back/dist/libs/jsvectormap/dist/maps/world.js?1674944402" defer></script>
     <script src="./back/dist/libs/jsvectormap/dist/maps/world-merc.js?1674944402" defer></script>
+    <script src="{{ asset('jquery-ui-1.13.2\jquery-ui.min.js') }}"></script>
     <!-- Tabler Core -->
     <script src="./back/dist/js/tabler.min.js?1674944402" defer></script>
    

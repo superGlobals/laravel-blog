@@ -26,6 +26,10 @@ Route::prefix('author')->name('author.')->group(function() {
         Route::prefix('posts')->name('posts.')->group(function() {
             Route::view('/add-post', 'back.pages.add-post')->name('add-post');
             Route::post('/create', [AuthorController::class, 'createPost'])->name('create');
+            Route::view('/all', 'back.pages.all-post')->name('all-post');
+            Route::get('/edit-post', [AuthorController::class, 'editPost'])->name('edit-post');
+            Route::post('/update-post', [AuthorController::class, 'updatePost'])->name('update-post');
+
         });
     });
 });

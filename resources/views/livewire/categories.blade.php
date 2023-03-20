@@ -22,15 +22,15 @@
                               <th class="w-1"></th>
                             </tr>
                           </thead>
-                          <tbody>
+                          <tbody id="sortable_category">
                             @forelse ($categories as $category)
-                              <tr>
+                              <tr data-index="{{ $category->id }}" data-ordering="{{ $category->ordering }}">
                                 <td>{{ $category->category_name }}</td>
                                 <td>{{ $category->subcategories->count() }}</td>
                                 <td>
                                     <div class="btn-group">
                                         <a href="" class="btn btn-primary btn-sm" wire:click.prevent="editCategory({{ $category->id }})">Edit</a>
-                                        <a href="" class="btn btn-danger btn-sm">Delete</a>
+                                        <a href="" class="btn btn-danger btn-sm" wire:click.prevent="deleteCategory({{ $category->id }})">Delete</a>
                                     </div>
                                 </td>
                               </tr>
@@ -67,16 +67,16 @@
                               <th class="w-1"></th>
                             </tr>
                           </thead>
-                          <tbody>
+                          <tbody id="sortable_subcategory">
                             @forelse ($subcategories as $subcategory)
-                              <tr>
+                              <tr data-index="{{ $subcategory->id }}" data-ordering="{{ $subcategory->ordering }}">
                                 <td>{{ $subcategory->subcategory_name }}</td>
-                                <td>{{ $subcategory->parentCategory->category_name }}</td>
+                                <td>{{ $subcategory->parent_category != 0 ? $subcategory->parentCategory->category_name : ' - ' }}</td>
                                 <td>{{ $subcategory->posts->count() }}</td>
                                 <td>
                                     <div class="btn-group">
                                         <a href="" class="btn btn-primary btn-sm" wire:click.prevent="editSubCategory({{ $subcategory->id }})">Edit</a>
-                                        <a href="" class="btn btn-danger btn-sm">Delete</a>
+                                        <a href="" class="btn btn-danger btn-sm" wire:click.prevent="deleteSubCategory({{ $subcategory->id }})">Delete</a>
                                     </div>
                                 </td>
                             </tr>
@@ -155,9 +155,9 @@
               <div class="mb-3">
                 <div class="form-label">Parent Category</div>
                 <select class="form-select" wire:model="parent_category">
-                  @if (!$updateSubCategoryMode)
-                      <option value="">No Selected</option>
-                  @endif
+                 
+                  <option value="0">-- Uncategorized --</option>
+
                   @foreach (\App\Models\Category::all() as $category)
                       <option value="{{ $category->id }}">{{ $category->category_name }}</option>
                   @endforeach

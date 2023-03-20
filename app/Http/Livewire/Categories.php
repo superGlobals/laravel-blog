@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\Post;
 use Livewire\Component;
 use App\Models\Category;
 use App\Models\SubCategory;
@@ -10,10 +11,14 @@ use Illuminate\Support\Str;
 class Categories extends Component
 {
     public $category_name, $selected_category_id, $updateCategoryMode = false;
-    public $subcategory_name, $selected_subcategory_id, $parent_category, $updateSubCategoryMode = false; 
+    public $subcategory_name, $selected_subcategory_id, $parent_category = 0, $updateSubCategoryMode = false; 
 
-    protected $liesteners = [
-        'resetModalForm'
+    protected $listeners = [
+        'resetModalForm',
+        'deleteCategoryAction',
+        'deleteSubCategoryAction',
+        'updateCategoryOrdering',
+        'updateSubCategoryOrdering'
     ];  
 
     public function resetModalForm()
@@ -134,6 +139,87 @@ class Categories extends Component
                 $this->dispatchBrowserEvent('error', ['message' => 'Something went wrong.']);
             }
         }
+    }
+
+    public function deleteCategory($id)
+    {
+        $category = Category::find($id);
+        $this->dispatchBrowserEvent('deleteCategory', [
+            'title' => 'Are you sure?',
+            'html' => 'You want to delete <b>'.$category->category_name.'</b> category',
+            'id' => $id,
+        ]);
+    }
+
+    public function deleteCategoryAction($id)
+    {
+        $category = Category::where('id', $id)->first();
+        $subcategories = SubCategory::where('parent_category', $category->id)->whereHas('posts')->with('posts')->get();
+
+        if(!empty($subcategories) && count($subcategories) > 0) {
+            $totalPosts = 0;
+
+            foreach($subcategories as $subcat) {
+                $totalPosts += Post::where('category_id', $subcat->id)->get()->count();
+            }
+
+            $this->dispatchBrowserEvent('error', ['message' => 'This category has ('.$totalPosts.') posts related to it, cannot be deleted']);
+
+        } else {
+            SubCategory::where('parent_category', $category->id)->delete();
+            $category->delete();
+
+            $this->dispatchBrowserEvent('success', ['message' => 'Category deleted succesfully.']);
+        }
+    }
+
+    public function deleteSubCategory($id)
+    {
+        $subcategory = SubCategory::find($id);
+        $this->dispatchBrowserEvent('deleteSubCategory', [
+            'title' => 'Are you sure?',
+            'html' => 'You want to delete <b>'.$subcategory->subcategory_name.'</b> subcategory',
+            'id' => $id,
+        ]);
+    }
+
+    public function deleteSubCategoryAction($id)
+    {
+        $subcategory = SubCategory::where('id', $id)->first();
+        $posts = Post::where('category_id', $subcategory->id)->get()->toArray();
+
+        if(!empty($posts) && count($posts) > 0) {
+            $this->dispatchBrowserEvent('error', ['message' => 'This subcategory has ('.count($posts).') posts related to it, cannot be deleted']);
+        } else {
+            $subcategory->delete();
+            $this->dispatchBrowserEvent('success', ['message' => 'SubCategory deleted succesfully.']);
+        }
+    }
+
+    public function updateCategoryOrdering($positions)
+    {
+        // dd($positions);
+        foreach($positions as $position) {
+            $index = $position[0];
+            $newPosition = $position[1];
+            Category::where('id', $index)->update([
+                'ordering' => $newPosition
+            ]);
+        }
+        $this->dispatchBrowserEvent('success', ['message' => 'Category ordering updated successfuly.']);
+    }
+
+    public function updateSubCategoryOrdering($positions)
+    {
+        // dd($positions);
+        foreach($positions as $position) {
+            $index = $position[0];
+            $newPosition = $position[1];
+            SubCategory::where('id', $index)->update([
+                'ordering' => $newPosition
+            ]);
+        }
+        $this->dispatchBrowserEvent('success', ['message' => 'Sub Categories ordering updated successfuly.']);
     }
 
     public function render()
