@@ -26,7 +26,8 @@
     <link rel="stylesheet" href="{{ asset('jquery-ui-1.13.2/jquery-ui.min.css') }}">
     <link rel="stylesheet" href="{{ asset('jquery-ui-1.13.2/jquery-ui.structure.min.css') }}">
     <link rel="stylesheet" href="{{ asset('jquery-ui-1.13.2/jquery-ui.theme.min.css') }}">
-
+    <link rel="stylesheet" href="{{ asset('amsify/amsify.suggestags.css') }}">
+    
     @stack('stylesheets')
     @livewireStyles
     <link href="./back/dist/css/demo.min.css?1674944402" rel="stylesheet"/>
@@ -70,6 +71,7 @@
     <script src="./back/dist/libs/jsvectormap/dist/maps/world.js?1674944402" defer></script>
     <script src="./back/dist/libs/jsvectormap/dist/maps/world-merc.js?1674944402" defer></script>
     <script src="{{ asset('jquery-ui-1.13.2\jquery-ui.min.js') }}"></script>
+    <script src="{{ asset('amsify/jquery.amsify.suggestags.js') }}"></script>
     <!-- Tabler Core -->
     <script src="./back/dist/js/tabler.min.js?1674944402" defer></script>
    
@@ -77,6 +79,9 @@
     @livewireScripts
      {{-- Toastr Script --}}
      <script>
+
+      $('input[name="post_tags"]').amsifySuggestags();
+
       $(document).ready(function() {
           toastr.options = {
               "progressBar": true,

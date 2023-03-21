@@ -14,8 +14,9 @@
 	<meta charset="utf-8">
 	<title>@yield('pageTitle')</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
-	<meta name="description" content="{{ blogInfo()->blog_description }}">
-	<meta name="author" content="{{ blogInfo()->blog_name }}">
+	@yield('meta_tags')
+	{{-- <meta name="description" content="{{ blogInfo()->blog_description }}">
+	<meta name="author" content="{{ blogInfo()->blog_name }}"> --}}
 	<link rel="shortcut icon" href="{{ blogInfo()->blog_favicon }}" type="image/x-icon">
 	<link rel="icon" href="{{ blogInfo()->blog_favicon }}" type="image/x-icon">
   
@@ -29,6 +30,8 @@
 
 	<!-- # CSS Plugins -->
 	<link rel="stylesheet" href="{{ asset('front/plugins/bootstrap/bootstrap.min.css') }}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	@stack('stylesheets')
 
 	<!-- # Main Style Sheet -->
 	<link rel="stylesheet" href="{{ asset('front/css/style.css') }}">
@@ -51,7 +54,7 @@
 <!-- # JS Plugins -->
 <script src="{{ asset('front/plugins/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('front/plugins/bootstrap/bootstrap.min.js') }}"></script>
-
+@stack('scripts')
 <!-- Main Script -->
 <script src="{{ asset('front/js/script.js') }}"></script>
 
